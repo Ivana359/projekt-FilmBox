@@ -104,3 +104,191 @@ const filmy = [
 		premiera: '2022-12-24',
 	},
 ]
+
+
+// Bonus - detail filmu
+
+const detailFilmu = document.querySelector('#detail-filmu')
+const idFilmu = location.hash.substring(1)
+let film
+filmy.forEach((porovnavanyFilm)=>{
+	if (porovnavanyFilm.id === idFilmu){
+		film = porovnavanyFilm
+	}
+})
+detailFilmu.querySelector('.card-title').textContent=film.nazev
+detailFilmu.querySelector('.card-text').textContent=film.popis
+const plakat = detailFilmu.querySelector('.img-fluid')
+plakat.src= film.plakat.url
+plakat.width = film.plakat.sirka
+plakat.height = film.plakat.vyska
+
+// Bonus - premiéra
+
+
+const premiera = document.querySelector('#premiera');
+const prem = dayjs(film.premiera); 
+const dnes = dayjs();
+const rozdilDnu = prem.diff(dnes, 'days');
+let dnyRetezec;
+
+if (rozdilDnu === 0) {
+  premiera.innerHTML = `Premiéra <strong>${prem.format('D. M. YYYY')}</strong>, což je dnes.`;
+} else if (dnes.isAfter(prem)) {
+  if (rozdilDnu === -1) {
+    dnyRetezec = 'dnem';
+  } else {
+    dnyRetezec = 'dny';
+  }
+  premiera.innerHTML = `Premiéra <strong>${prem.format('D. M. YYYY')}</strong>, což bylo před ${-rozdilDnu} ${dnyRetezec}.`;
+} else {
+  if (rozdilDnu === 1) {
+    dnyRetezec = 'dnem';
+  } else if (rozdilDnu >= 2 && rozdilDnu <= 4) { 
+    dnyRetezec = 'dny';
+  } else {
+    dnyRetezec = 'dní';
+  }
+  premiera.innerHTML = `Premiéra <strong>${prem.format('D. M. YYYY')}</strong>, což bude za ${rozdilDnu} ${dnyRetezec}.`;
+}
+
+// Bonus - hodnocení
+
+function zvyrazniHvezdicky(pocet) {
+	const hvezdicky = document.querySelectorAll('.fa-star');
+  
+	hvezdicky.forEach((hvezdicka, index) => {
+	  if (index < pocet) {
+		hvezdicka.classList.remove('far');
+		hvezdicka.classList.add('fas');
+	  } else {
+		hvezdicka.classList.remove('fas');
+		hvezdicka.classList.add('far');
+	  }
+	});
+  }
+  
+  
+  const hvezdicky = document.querySelectorAll('.fa-star');
+  let posledniKliknutaHvezdicka = 0; 
+
+  hvezdicky.forEach((hvezdicka, index) => {
+	
+	hvezdicka.addEventListener('click', () => {
+	  posledniKliknutaHvezdicka = index + 1; 
+	  zvyrazniHvezdicky(posledniKliknutaHvezdicka);
+	});
+  
+	
+	hvezdicka.addEventListener('mouseenter', () => {
+	  zvyrazniHvezdicky(index + 1);
+	});
+  
+	
+	hvezdicka.addEventListener('mouseleave', () => {
+	  zvyrazniHvezdicky(posledniKliknutaHvezdicka);
+	});
+  });
+
+  //Poznámka
+  const noteForm = document.querySelector('#note-form');
+const messageInput = document.querySelector('#message-input');
+const termsCheckbox = document.querySelector('#terms-checkbox');
+
+noteForm.addEventListener('submit', function (event) {
+ 
+  event.preventDefault();
+
+  
+  messageInput.classList.remove('is-invalid');
+  termsCheckbox.classList.remove('is-invalid');
+
+  
+  const messageValue = messageInput.value.trim();
+  if (messageValue === '') {
+    
+    messageInput.classList.add('is-invalid');
+    messageInput.focus();
+    return;
+  }
+
+ 
+  if (!termsCheckbox.checked) {
+   
+    termsCheckbox.classList.add('is-invalid');
+    termsCheckbox.focus();
+    return;
+  }
+
+ 
+  const noteContent = `<p class="card-text">${messageValue}</p>`;
+  const noteCard = document.querySelector('.note-card');
+  noteCard.innerHTML = noteContent;
+});
+
+//Bonus: vlastní ovládání přehrávače
+const video = document.querySelector('video');
+const playerControls = document.querySelector('.player-controls');
+const playButton = document.querySelector('.play');
+const pauseButton = document.querySelector('.pause');
+const currentTimeDisplay = document.querySelector('.current-time');
+
+let controlsTimeout;
+
+
+function showControls() {
+  playerControls.classList.remove('hidden');
+  
+  clearTimeout(controlsTimeout);
+  
+  controlsTimeout = setTimeout(() => {
+    playerControls.classList.add('hidden');
+  }, 3000);
+}
+
+
+document.addEventListener('mousemove', showControls);
+document.addEventListener('keydown', showControls);
+
+
+playButton.addEventListener('click', function () {
+  video.play();
+});
+
+
+video.addEventListener('playing', function () {
+  playerControls.classList.add('playing');
+});
+
+
+pauseButton.addEventListener('click', function () {
+  video.pause();
+});
+
+
+video.addEventListener('pause', function () {
+  playerControls.classList.remove('playing');
+});
+
+
+video.addEventListener('timeupdate', function () {
+  const minutes = Math.floor(video.currentTime / 60);
+  const seconds = Math.floor(video.currentTime % 60);
+  currentTimeDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+});
+
+
+document.addEventListener('keydown', function (event) {
+  if (
+    event.code === 'Space' &&
+    event.target.tagName !== 'TEXTAREA' &&
+    event.target.tagName !== 'INPUT' &&
+    event.target.tagName !== 'BUTTON'
+  ) {
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }
+});
